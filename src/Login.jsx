@@ -14,7 +14,7 @@ const Login = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       console.log("King Logged In!");
-      navigate('/chat'); // Login ke baad seedha dashboard
+      navigate('/chat'); //from loginn to dashboard
     } catch (error) {
       alert("Invalid Credentials, King. Check again.");
     }

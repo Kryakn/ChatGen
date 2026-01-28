@@ -9,7 +9,7 @@ import {
 const Chat = ({ user }) => {
   const auth = getAuth();
   
-  // Guard clause for authentication state
+  // Guard authentication state
   if (!user) return (
     <div className="h-screen flex flex-col items-center justify-center bg-blue-600 text-white font-bold animate-pulse">
       <div className="text-4xl mb-4">👑</div>
@@ -26,7 +26,7 @@ const Chat = ({ user }) => {
   const scrollRef = useRef();
   const typingTimeout = useRef(null);
 
-  // 1. Sidebar: Fetch all users except current logged-in user
+  //Sidebar: Fetch all users except current logged-in user
   useEffect(() => {
     const q = query(collection(db, "users"), where("uid", "!=", user.uid));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -35,7 +35,7 @@ const Chat = ({ user }) => {
     return () => unsubscribe();
   }, [user.uid]);
 
-  // 2. Presence: Track active chat partner's status
+  // Presence: Track active chat partner's status
   useEffect(() => {
     if (!activeChatId) return;
     const unsub = onSnapshot(doc(db, "users", activeChatId), (docSnap) => {
@@ -44,7 +44,7 @@ const Chat = ({ user }) => {
     return () => unsub();
   }, [activeChatId]);
 
-  // 3. Real-time Message Fetching & Read Status Logic
+  // Real-time Message Fetching & Read Status
   useEffect(() => {
     if (!activeChatId) return;
     const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
@@ -67,12 +67,12 @@ const Chat = ({ user }) => {
     return () => unsubscribe();
   }, [activeChatId, user.uid]);
 
-  // 4. UI: Auto-scroll to latest message
+  //  Auto-scroll 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 5. Utility: Format timestamps to human-readable time
+  //  timestamps 
   const formatTime = (timestamp) => {
     if (!timestamp) return "...";
     const date = timestamp.toDate();
@@ -81,12 +81,12 @@ const Chat = ({ user }) => {
 
   const handleLogout = () => signOut(auth);
 
-  // 6. Search Filtering
+  //search filtering
   const filteredUsers = users.filter((u) =>
     u.displayName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 7. Typing Indicator Logic
+  //Typing.....
   const handleTyping = (e) => {
     setNewMessage(e.target.value);
     const userRef = doc(db, "users", user.uid);
@@ -120,7 +120,7 @@ const Chat = ({ user }) => {
 
   return (
     <div className="flex h-screen bg-white font-sans overflow-hidden">
-      {/* SIDEBAR */}
+      {/* sidebar */}
       <div className="w-1/4 bg-white border-r border-gray-200 flex flex-col shadow-xl z-10">
         <div className="p-5 bg-gradient-to-r from-blue-700 to-blue-500 text-white">
           <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ const Chat = ({ user }) => {
           </div>
         </div>
 
-        {/* Search Bar */}
+        {/*search bar*/}
         <div className="p-4 bg-gray-50/50">
           <div className="relative">
             <input 
@@ -148,7 +148,7 @@ const Chat = ({ user }) => {
           </div>
         </div>
 
-        {/* User List */}
+        {/*user list*/}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           {filteredUsers.map((u) => (
             <div key={u.uid} onClick={() => setActiveChatId(u.uid)} className={`px-5 py-4 flex items-center cursor-pointer transition-all relative ${activeChatId === u.uid ? 'bg-blue-50/80 border-r-4 border-blue-600' : 'hover:bg-gray-50'}`}>
@@ -166,7 +166,7 @@ const Chat = ({ user }) => {
           ))}
         </div>
 
-        {/* Logout Control */}
+        {/*logout control*/}
         <div className="p-4 border-t border-gray-100">
           <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-xl font-bold text-xs hover:bg-red-100 transition-all border border-red-100 shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -177,7 +177,7 @@ const Chat = ({ user }) => {
         </div>
       </div>
 
-      {/* CHAT WINDOW */}
+      {/*chat window*/}
       <div className="flex-1 flex flex-col bg-[#f8f9fb]">
         {activeChatId ? (
           <>
@@ -214,7 +214,7 @@ const Chat = ({ user }) => {
           <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4">
              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-3xl shadow-xl border-4 border-blue-50 animate-bounce">💬</div>
              <div className="text-center px-4">
-               {/* FIXED: DYNAMIC USERNAME WELCOME */}
+               {/* username welcome */}
                <h2 className="text-2xl font-bold text-gray-800 tracking-tight">Welcome, {user?.displayName?.split(" ")[0] || "Friend"}!</h2>
                <p className="italic text-sm font-medium mt-2 max-w-xs text-gray-500">
                  Connect with your contacts to start sharing secure messages in real-time.

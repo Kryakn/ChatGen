@@ -13,14 +13,14 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      // 1. Firebase Auth mein account banana
+      //for making account in firebase auth.
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // 2. Profile update karna (Header mein naam dikhane ke liye)
+      //profile update
       await updateProfile(user, { displayName: name });
 
-      // 3. Firestore mein user record save karna
+      //for save credential in firebase firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         displayName: name,
