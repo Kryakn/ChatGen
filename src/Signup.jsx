@@ -9,17 +9,14 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const navigate = useNavigate();
-
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
       //for making account in firebase auth.
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
       //profile update
       await updateProfile(user, { displayName: name });
-
       //for save credential in firebase firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -27,7 +24,6 @@ const Signup = () => {
         email: email,
         createdAt: serverTimestamp(),
       });
-
       console.log("Signup Successful!");
       navigate("/chat"); 
     } catch (error) {
@@ -35,7 +31,6 @@ const Signup = () => {
       alert(error.message);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-10 border border-gray-100">
@@ -43,8 +38,7 @@ const Signup = () => {
           <h2 className="text-3xl font-extrabold text-gray-900">Create Account</h2>
           <p className="text-gray-500 mt-2">Join the elite community</p>
         </div>
-        
-        <form onSubmit={handleSignup} className="space-y-6">
+       <form onSubmit={handleSignup} className="space-y-6">
           <div className="relative">
             <input 
               type="text" 
@@ -53,8 +47,7 @@ const Signup = () => {
               onChange={(e) => setName(e.target.value)} 
               required 
             />
-          </div>
-          
+          </div>          
           <div className="relative">
             <input 
               type="email" 
@@ -64,7 +57,6 @@ const Signup = () => {
               required 
             />
           </div>
-
           <div className="relative">
             <input 
               type="password" 
@@ -74,7 +66,6 @@ const Signup = () => {
               required 
             />
           </div>
-
           <button 
             type="submit" 
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors shadow-lg active:transform active:scale-95"
@@ -82,7 +73,6 @@ const Signup = () => {
             Sign Up
           </button>
         </form>
-
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Already a member? <Link to="/login" className="text-blue-600 font-semibold hover:underline">Sign In</Link>
@@ -92,5 +82,4 @@ const Signup = () => {
     </div>
   );
 };
-
 export default Signup;

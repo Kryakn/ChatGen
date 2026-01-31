@@ -23,7 +23,7 @@ function App() {
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-blue-600 text-white font-bold animate-pulse">
-     Authenticating Aryan...
+     Authenticating...
       </div>
     );
   }

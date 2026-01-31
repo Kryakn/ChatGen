@@ -16,7 +16,7 @@ const Login = () => {
       console.log("King Logged In!");
       navigate('/chat'); //from loginn to dashboard
     } catch (error) {
-      alert("Invalid Credentials, King. Check again.");
+      alert("Invalid Credentials,Check again.");
     }
   };
 

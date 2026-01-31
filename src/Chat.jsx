@@ -44,7 +44,7 @@ const Chat = ({ user }) => {
     return () => unsub();
   }, [activeChatId]);
 
-  // Real-time Message Fetching & Read Status
+  // Real-time Message Fetching aur Read Status
   useEffect(() => {
     if (!activeChatId) return;
     const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
@@ -156,11 +156,11 @@ const Chat = ({ user }) => {
                 <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border-2 border-white">
                   <GlobalUserIcon className="w-8 h-8 opacity-60" />
                 </div>
-                {u.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>}
+                {u.online && <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${u.online ? 'bg-cyan-400' : 'bg-gray-300'}`}></div>}
               </div>
               <div className="ml-4 flex-1">
                 <h3 className="text-sm font-bold text-gray-800">{u.displayName}</h3>
-                <p className="text-[11px] text-gray-400 truncate">{u.typingTo === user.uid ? "typing..." : "Active now"}</p>
+                <p className="text-[11px] text-gray-400 truncate">{u.typingTo === user.uid ? "typing..." : (u.online ? "Active now" : "Offline")}</p>
               </div>
             </div>
           ))}
