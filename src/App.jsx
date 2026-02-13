@@ -1,29 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-import LandingPage from "./components/LandingPage"; 
+import LandingPage from "./components/LandingPage";
 import Signup from "./Signup";
 import Login from "./Login";
 import Chat from "./Chat";
 
-function App() {
+// Component to protect chat route - requires verified email
+function ProtectedChatRoute({ user }) {
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+  if (!user.emailVerified) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow max-w-md">
+          <div className="text-4xl mb-4">✉️</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Email Not Verified
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Please verify your email address to access the chat.
+          </p>
+          <a
+            href="/login"
+            className="text-blue-600 hover:underline"
+            onClick={() => auth.signOut()}
+          >
+            Back to Login
+          </a>
+        </div>
+      </div>
+    );
+  }
+  return <Chat user={user} />;
+}
+
+export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Firebase auth observer: admin login
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-blue-600 text-white font-bold animate-pulse">
-     Authenticating...
+      <div className="h-screen flex items-center justify-center bg-blue-600 text-white">
+        <div className="text-center">
+          <div className="text-2xl mb-2">Loading...</div>
+          <div className="text-sm opacity-75">Please wait</div>
+        </div>
       </div>
     );
   }
@@ -34,13 +67,11 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route 
-          path="/chat" 
-          element={user ? <Chat user={user} /> : <Navigate to="/login" />} 
+        <Route
+          path="/chat"
+          element={<ProtectedChatRoute user={user} />}
         />
       </Routes>
     </Router>
   );
 }
-
-export default App;
