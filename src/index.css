@@ -1,11 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 body {
   margin: 0 !important;
-  background-color: #f8fafc !important;
+  background-color: #f8fafc;
   background-image: 
     radial-gradient(at 0% 0%, hsla(214, 94%, 87%, 1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(221, 83%, 93%, 1) 0px, transparent 50%) !important;
-  background-attachment: fixed !important;
-  min-height: 100vh !important;
+    radial-gradient(at 100% 100%, hsla(221, 83%, 93%, 1) 0px, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Dark mode styles */
+html.dark body {
+  background-color: #111827;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(214, 50%, 20%, 1) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(221, 50%, 15%, 1) 0px, transparent 50%);
 }
