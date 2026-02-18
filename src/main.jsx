@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     {/* Catch errors and show fallback UI */}
     <ErrorBoundary>
-      {/* Global theme state */}
+      {/* Global theme state - wraps everything */}
       <ThemeProvider>
         {/* Global auth state */}
         <AuthProvider>

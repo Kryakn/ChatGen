@@ -121,5 +121,36 @@ service cloud.firestore {
       allow delete: if isAuthenticated()
         && resource.data.uid == request.auth.uid;
     }
+    
+    // Contacts collection rules - for contact-based privacy
+    match /contacts/{userId}/userContacts/{contactDocId} {
+      // Allow read only if user is viewing their own contacts
+      allow read: if isAuthenticated()
+        && request.auth.uid == userId;
+      
+      // Allow create if:
+      // 1. User is adding to their own contacts, OR
+      // 2. Someone is adding current user as their contact (mutual add)
+      allow create: if isAuthenticated()
+        && (
+          // Adding to own contacts
+          (request.auth.uid == userId
+            && request.resource.data.keys().hasAll(['contactId', 'addedAt'])
+            && request.resource.data.contactId is string
+            && request.resource.data.contactId != request.auth.uid) // Can't add self
+          ||
+          // Mutual add - someone adding me to their contacts
+          (request.resource.data.contactId == request.auth.uid
+            && request.resource.data.keys().hasAll(['contactId', 'addedAt'])
+            && request.resource.data.contactId is string)
+        );
+      
+      // Allow delete only by owner
+      allow delete: if isAuthenticated()
+        && request.auth.uid == userId;
+      
+      // No updates allowed
+      allow update: if false;
+    }
   }
 }

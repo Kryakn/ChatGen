@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { useTheme } from "./context/ThemeContext";
 
 import LandingPage from "./components/LandingPage";
-import Signup from "./Signup";
-import Login from "./Login";
-import Chat from "./Chat";
+import Signup from "./pages/Signup";
+import Login from "./pages/Login";
+import Chat from "./pages/Chat";
 
 // Component to protect chat route - requires verified email
 function ProtectedChatRoute({ user }) {
@@ -41,6 +42,7 @@ function ProtectedChatRoute({ user }) {
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
