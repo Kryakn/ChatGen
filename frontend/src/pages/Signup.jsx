@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Eye, EyeOff } from "lucide-react";
 import {
   createUserWithEmailAndPassword,
   updateProfile,
@@ -58,6 +58,7 @@ export default function Signup() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
 
@@ -100,18 +101,12 @@ export default function Signup() {
       // Step 2: Update profile with name
       await updateProfile(user, { displayName: formData.name.trim() });
 
-      // Step 3: Save user data to Firestore
-      await setDoc(doc(db, COLLECTIONS.USERS, user.uid), {
-        uid: user.uid,
-        displayName: formData.name.trim(),
-        email: formData.email.toLowerCase(),
-        emailVerified: false,
-        createdAt: serverTimestamp(),
-      });
-
-      // Step 4: Send verification email
+      // Step 3: Send verification email
       await sendEmailVerification(user);
       setVerificationSent(true);
+      
+      // Note: User data will be saved to Firestore only after email verification
+      // This happens in Login.jsx when user signs in with verified email
 
       // Note: User cannot navigate to chat until email is verified
     } catch (error) {
@@ -169,6 +164,15 @@ export default function Signup() {
             <strong>{formData.email}</strong>. Please check your inbox and click
             the verification link to continue.
           </p>
+          
+          {/* Spam warning */}
+          <div className={`mb-4 p-3 rounded-lg text-sm ${
+            isDark ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
+          }`}>
+            <p className="font-medium mb-1">📧 Can't find the email?</p>
+            <p>Check your <strong>Spam/Junk</strong> folder and mark it as "Not spam"</p>
+          </div>
+          
           <p className={`text-sm ${
             isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>
@@ -257,18 +261,32 @@ export default function Signup() {
           </div>
 
           <div>
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`w-full px-4 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
-                isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                  : 'bg-gray-50 border-gray-200'
-              } ${errors.password ? "border-red-300" : ""}`}
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-3 pr-12 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark 
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                    : 'bg-gray-50 border-gray-200'
+                } ${errors.password ? "border-red-300" : ""}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded ${
+                  isDark 
+                    ? 'text-gray-400 hover:text-gray-200' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}

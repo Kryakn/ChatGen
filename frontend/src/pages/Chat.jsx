@@ -7,7 +7,8 @@ import {
   getDocs, limit
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Menu, X, Image, Send, Lock, Moon, Sun } from "lucide-react";
+import { Menu, X, Image, Send, Lock, Moon, Sun, User, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 import { encryptMessage, decryptMessage, isEncrypted } from "../utils/encryption";
 import { useTheme } from "../context/ThemeContext";
 import { EDIT_TIME_LIMIT, COLLECTIONS, STORAGE_KEYS } from "../constants";
@@ -765,14 +766,32 @@ export default function Chat({ user }) {
               <p className="text-xs text-blue-100">Online</p>
             </div>
           </div>
-          {/* Theme toggle button */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Profile button */}
+            <Link
+              to="/profile"
+              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+              title="Profile Settings"
+            >
+              <User size={20} />
+            </Link>
+            {/* Theme toggle button */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+            {/* Logout button */}
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
+              title="Logout"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Create Group & Find Users Buttons */}
@@ -1468,10 +1487,23 @@ export default function Chat({ user }) {
               {/* Recently removed chats section */}
               {removedChats.length > 0 && (
                 <div className="mt-6 pt-4 border-t dark:border-gray-700">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Hidden Chats ({removedChats.length})
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Hidden Chats ({removedChats.length})
+                    </h4>
+                    <button
+                      onClick={() => {
+                        if (confirm("Clear all hidden chats? You can find these users again using search.")) {
+                          localStorage.removeItem(STORAGE_KEYS.REMOVED_CHATS);
+                          setRemovedChats([]);
+                        }
+                      }}
+                      className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 underline"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     These users are hidden from your sidebar. Search above to add them back.
                   </p>
                 </div>

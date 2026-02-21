@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Mail, Lock, LogIn, ArrowLeft, Moon, Sun } from "lucide-react";
+import { Mail, Lock, LogIn, ArrowLeft, Moon, Sun, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { useTheme } from "../context/ThemeContext";
 import { MIN_PASSWORD_LENGTH, ROUTES } from "../constants";
 
@@ -33,6 +34,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
 
@@ -97,14 +99,33 @@ export default function Login() {
         formData.password
       );
 
+      // Reload user to get latest emailVerified status
+      await userCredential.user.reload();
+      const refreshedUser = auth.currentUser;
+
       // Check if email is verified
-      if (!userCredential.user.emailVerified) {
+      if (!refreshedUser.emailVerified) {
         setErrors((prev) => ({
           ...prev,
           general:
             "Please verify your email before signing in. Check your inbox for the verification link.",
         }));
+        setIsLoading(false);
         return;
+      }
+
+      // Save user to Firestore only after email is verified (only if not exists)
+      try {
+        await setDoc(doc(db, "users", refreshedUser.uid), {
+          uid: refreshedUser.uid,
+          displayName: refreshedUser.displayName || "",
+          email: refreshedUser.email.toLowerCase(),
+          emailVerified: true,
+          createdAt: serverTimestamp(),
+        });
+      } catch (firestoreError) {
+        // If document already exists, that's fine - just log it
+        console.log("User document may already exist:", firestoreError.message);
       }
 
       navigate(ROUTES.CHAT);
@@ -320,17 +341,29 @@ export default function Login() {
                 isDark ? 'text-gray-500' : 'text-gray-400'
               }`} size={20} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
+                className={`w-full pl-10 pr-12 py-3 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 ${
                   isDark 
                     ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
                     : 'bg-gray-50 border-gray-200'
                 } ${errors.password ? "border-red-300" : ""}`}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded ${
+                  isDark 
+                    ? 'text-gray-400 hover:text-gray-200' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>

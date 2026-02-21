@@ -7,6 +7,8 @@ import { useTheme } from "./context/ThemeContext";
 import LandingPage from "./components/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
+import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 
 // Component to protect chat route - requires verified email
@@ -69,6 +71,8 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/profile" element={<Profile />} />
         <Route
           path="/chat"
           element={<ProtectedChatRoute user={user} />}
