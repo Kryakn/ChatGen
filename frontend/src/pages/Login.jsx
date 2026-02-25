@@ -321,7 +321,8 @@ export default function Login() {
           </div>
         )}
 
-        {errors.general && (
+        {/* Show error only if not coming from verification */}
+        {errors.general && !isVerified && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
             isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'
           }`}>
