@@ -107,10 +107,8 @@ export default function Login() {
       // Reload user to get latest emailVerified status
       await userCredential.user.reload();
       
-      // Force token refresh to ensure we have latest claims
-      await userCredential.user.getIdToken(true);
-      
-      const refreshedUser = auth.currentUser;
+      // Use the reloaded user directly (not auth.currentUser)
+      const refreshedUser = userCredential.user;
 
       // Check if email is verified
       if (!refreshedUser.emailVerified) {
