@@ -104,29 +104,15 @@ export default function Login() {
         formData.password
       );
 
-      // Reload user to get latest emailVerified status
-      await userCredential.user.reload();
-      
-      // Use the reloaded user directly (not auth.currentUser)
-      const refreshedUser = userCredential.user;
+      // Get user data
+      const user = userCredential.user;
 
-      // Check if email is verified
-      if (!refreshedUser.emailVerified) {
-        setErrors((prev) => ({
-          ...prev,
-          general:
-            "Please verify your email before signing in. Check your inbox for the verification link.",
-        }));
-        setIsLoading(false);
-        return;
-      }
-
-      // Save user to Firestore only after email is verified (only if not exists)
+      // Save user to Firestore (email verification temporarily disabled)
       try {
-        await setDoc(doc(db, "users", refreshedUser.uid), {
-          uid: refreshedUser.uid,
-          displayName: refreshedUser.displayName || "",
-          email: refreshedUser.email.toLowerCase(),
+        await setDoc(doc(db, "users", user.uid), {
+          uid: user.uid,
+          displayName: user.displayName || "",
+          email: user.email.toLowerCase(),
           emailVerified: true,
           createdAt: serverTimestamp(),
         });

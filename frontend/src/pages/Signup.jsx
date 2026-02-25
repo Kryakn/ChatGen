@@ -106,14 +106,17 @@ export default function Signup() {
       // Step 2: Update profile with name
       await updateProfile(user, { displayName: formData.name.trim() });
 
-      // Step 3: Send verification email
-      await sendEmailVerification(user);
-      setVerificationSent(true);
-      
-      // Note: User data will be saved to Firestore only after email verification
-      // This happens in Login.jsx when user signs in with verified email
+      // Step 3: Save user to Firestore immediately (email verification temporarily disabled)
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        displayName: formData.name.trim(),
+        email: formData.email.toLowerCase(),
+        emailVerified: true, // Auto-verified for now
+        createdAt: serverTimestamp(),
+      });
 
-      // Note: User cannot navigate to chat until email is verified
+      // Redirect to chat directly (no email verification for now)
+      navigate(ROUTES.CHAT);
     } catch (error) {
       console.error("Signup error:", error);
       let errorMessage = "Failed to create account. Please try again.";
