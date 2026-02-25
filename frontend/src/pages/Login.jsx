@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock, LogIn, ArrowLeft, Moon, Sun, Eye, EyeOff } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { auth, db } from "../firebase";
 import {
   signInWithEmailAndPassword,
@@ -36,7 +36,12 @@ export default function Login() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
+  
+  // Check if user came from email verification
+  const searchParams = new URLSearchParams(location.search);
+  const isVerified = searchParams.get("verified") === "true";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -306,6 +311,15 @@ export default function Login() {
         <p className={`text-center mb-6 ${
           isDark ? 'text-gray-400' : 'text-gray-500'
         }`}>Sign in to continue</p>
+
+        {/* Show success message if email was verified */}
+        {isVerified && (
+          <div className={`mb-4 p-3 rounded-lg text-sm ${
+            isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-600'
+          }`}>
+            ✅ Email verified successfully! Please sign in to continue.
+          </div>
+        )}
 
         {errors.general && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${

@@ -41,8 +41,8 @@ export default function VerifyEmail() {
         setStatus("success");
         setMessage("Your email has been verified successfully! Redirecting...");
         
-        // Redirect to login page immediately
-        navigate("/login");
+        // Redirect to login page with verified flag
+        navigate("/login?verified=true");
       } catch (error) {
         console.error("Verification error:", error);
         setStatus("error");
