@@ -39,12 +39,10 @@ export default function VerifyEmail() {
         await applyActionCode(auth, actionCode);
         
         setStatus("success");
-        setMessage("Your email has been verified successfully!");
+        setMessage("Your email has been verified successfully! Redirecting...");
         
-        // Redirect to signup page after 3 seconds (user can now login)
-        setTimeout(() => {
-          navigate("/signup");
-        }, 3000);
+        // Redirect to signup page immediately
+        navigate("/signup");
       } catch (error) {
         console.error("Verification error:", error);
         setStatus("error");
@@ -133,7 +131,7 @@ export default function VerifyEmail() {
           <p className={`text-sm ${
             isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>
-            Redirecting to login page...
+            Redirecting to signup page...
           </p>
         )}
 
