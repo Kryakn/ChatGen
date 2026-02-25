@@ -115,9 +115,9 @@ export default function Chat({ user }) {
     setUnreadCount(unreadMessages);
 
     if (unreadMessages > 0) {
-      document.title = `(${unreadMessages}) Chat App`;
+      document.title = `(${unreadMessages}) ChatGen`;
     } else {
-      document.title = "Chat App";
+      document.title = "ChatGen";
     }
   }, [messages, user.uid]);
 
@@ -762,7 +762,7 @@ export default function Chat({ user }) {
               <UserIcon className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="font-bold">Chat App</h2>
+              <h2 className="font-bold">ChatGen</h2>
               <p className="text-xs text-blue-100">Online</p>
             </div>
           </div>

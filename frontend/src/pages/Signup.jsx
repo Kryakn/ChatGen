@@ -7,7 +7,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { MIN_PASSWORD_LENGTH, MAX_GROUP_NAME_LENGTH, ROUTES, COLLECTIONS } from "../constants";
 
@@ -60,7 +60,12 @@ export default function Signup() {
   const [verificationSent, setVerificationSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
+  
+  // Check if user came from email verification
+  const searchParams = new URLSearchParams(location.search);
+  const isVerified = searchParams.get("verified") === "true";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -214,6 +219,15 @@ export default function Signup() {
             isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>Sign up to get started</p>
         </div>
+
+        {/* Show success message if email was verified */}
+        {isVerified && (
+          <div className={`mb-4 p-3 rounded-lg text-sm ${
+            isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-600'
+          }`}>
+            ✅ Email verified successfully! Please create your account to continue.
+          </div>
+        )}
 
         {errors.general && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
