@@ -1,13 +1,9 @@
 import { useState } from "react";
 import { Moon, Sun, Eye, EyeOff } from "lucide-react";
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification,
-} from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { MIN_PASSWORD_LENGTH, MAX_GROUP_NAME_LENGTH, ROUTES, COLLECTIONS } from "../constants";
 
@@ -57,15 +53,9 @@ export default function Signup() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationSent, setVerificationSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
-  
-  // Check if user came from email verification
-  const searchParams = new URLSearchParams(location.search);
-  const isVerified = searchParams.get("verified") === "true";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,16 +96,15 @@ export default function Signup() {
       // Step 2: Update profile with name
       await updateProfile(user, { displayName: formData.name.trim() });
 
-      // Step 3: Save user to Firestore immediately (email verification temporarily disabled)
+      // Step 3: Save user to Firestore
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         displayName: formData.name.trim(),
         email: formData.email.toLowerCase(),
-        emailVerified: true, // Auto-verified for now
         createdAt: serverTimestamp(),
       });
 
-      // Redirect to chat directly (no email verification for now)
+      // Redirect to chat directly
       navigate(ROUTES.CHAT);
     } catch (error) {
       console.error("Signup error:", error);
@@ -134,67 +123,6 @@ export default function Signup() {
       setIsLoading(false);
     }
   };
-  // Show verification sent screen
-  if (verificationSent) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center px-4 transition-colors ${
-        isDark ? 'bg-gray-900' : 'bg-gray-50'
-      }`}>
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className={`absolute top-6 right-6 p-3 rounded-full transition-colors ${
-            isDark 
-              ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' 
-              : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
-          }`}
-        >
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-
-        <div className={`max-w-md w-full rounded-lg shadow p-8 text-center transition-colors ${
-          isDark ? 'bg-gray-800' : 'bg-white'
-        }`}>
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${
-            isDark ? 'bg-green-900' : 'bg-green-100'
-          }`}>
-            <span className="text-3xl">✉️</span>
-          </div>
-          <h2 className={`text-2xl font-bold mb-2 ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`}>
-            Verify Your Email
-          </h2>
-          <p className={`mb-4 ${
-            isDark ? 'text-gray-300' : 'text-gray-600'
-          }`}>
-            We have sent a verification email to{" "}
-            <strong>{formData.email}</strong>. Please check your inbox and click
-            the verification link to continue.
-          </p>
-          
-          {/* Spam warning */}
-          <div className={`mb-4 p-3 rounded-lg text-sm ${
-            isDark ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-50 text-yellow-700'
-          }`}>
-            <p className="font-medium mb-1">📧 Can't find the email?</p>
-            <p>Check your <strong>Spam/Junk</strong> folder and mark it as "Not spam"</p>
-          </div>
-          
-          <p className={`text-sm ${
-            isDark ? 'text-gray-400' : 'text-gray-500'
-          }`}>
-            After verifying, you can{" "}
-            <Link to={ROUTES.LOGIN} className="text-blue-600 hover:underline">
-              sign in here
-            </Link>
-            .
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen flex items-center justify-center px-4 transition-colors ${
       isDark ? 'bg-gray-900' : 'bg-gray-50'
@@ -222,15 +150,6 @@ export default function Signup() {
             isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>Sign up to get started</p>
         </div>
-
-        {/* Show success message if email was verified */}
-        {isVerified && (
-          <div className={`mb-4 p-3 rounded-lg text-sm ${
-            isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-600'
-          }`}>
-            ✅ Email verified successfully! Please create your account to continue.
-          </div>
-        )}
 
         {errors.general && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
