@@ -41,8 +41,8 @@ export default function VerifyEmail() {
         setStatus("success");
         setMessage("Your email has been verified successfully! Redirecting...");
         
-        // Redirect to signup page immediately
-        navigate("/signup");
+        // Redirect to login page immediately
+        navigate("/login");
       } catch (error) {
         console.error("Verification error:", error);
         setStatus("error");
@@ -131,7 +131,7 @@ export default function VerifyEmail() {
           <p className={`text-sm ${
             isDark ? 'text-gray-400' : 'text-gray-500'
           }`}>
-            Redirecting to signup page...
+            Redirecting to login page...
           </p>
         )}
 
