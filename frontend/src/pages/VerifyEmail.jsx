@@ -41,9 +41,9 @@ export default function VerifyEmail() {
         setStatus("success");
         setMessage("Your email has been verified successfully!");
         
-        // Redirect to login after 3 seconds
+        // Redirect to signup page after 3 seconds (user can now login)
         setTimeout(() => {
-          navigate("/login");
+          navigate("/signup");
         }, 3000);
       } catch (error) {
         console.error("Verification error:", error);
