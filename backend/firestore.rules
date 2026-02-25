@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function - check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function - check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Allow read if authenticated
+      allow read: if isAuthenticated();
+      
+      // Allow create only if user is creating their own document
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['uid', 'displayName', 'email', 'createdAt'])
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 50;
+      
+      // Allow update only for own profile (for online status, typing, etc)
+      allow update: if isOwner(userId)
+        && (
+          // Only allow specific fields to be updated
+          request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['online', 'typingTo', 'lastSeen', 'photoURL'])
+        );
+      
+      // Never allow delete
+      allow delete: if false;
+    }
+    
+    // Messages collection rules
+    match /messages/{messageId} {
+      // Allow read if user is sender or receiver
+      allow read: if isAuthenticated()
+        && (
+          resource.data.uid == request.auth.uid 
+          || resource.data.receiverId == request.auth.uid
+        );
+      
+      // Allow create if authenticated and sending as self
+      allow create: if isAuthenticated()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(['text', 'uid', 'receiverId', 'createdAt'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && request.resource.data.receiverId != request.auth.uid; // Can't message yourself
+      
+      // Allow update for read status and reactions
+      allow update: if isAuthenticated()
+        && (
+          // Read status update by receiver
+          (resource.data.receiverId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+            && request.resource.data.status in ['sent', 'delivered', 'read'])
+          ||
+          // Reactions update by any participant
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']))
+        );
+      
+      // Allow delete only by sender
+      allow delete: if isAuthenticated()
+        && resource.data.uid == request.auth.uid;
+    }
+    
+    // Groups collection rules
+    match /groups/{groupId} {
+      // Allow read if user is member
+      allow read: if isAuthenticated()
+        && resource.data.members.hasAny([request.auth.uid]);
+      
+      // Allow create if authenticated
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['name', 'members', 'createdBy', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 50
+        && request.resource.data.members is list
+        && request.resource.data.members.hasAny([request.auth.uid]);
+      
+      // Allow update only by creator or members
+      allow update: if isAuthenticated()
+        && resource.data.members.hasAny([request.auth.uid])
+        && request.resource.data.members.hasAny([request.auth.uid]);
+      
+      // Allow delete only by creator
+      allow delete: if isAuthenticated()
+        && resource.data.createdBy == request.auth.uid;
+    }
+    
+    // Group messages collection rules
+    match /groupMessages/{messageId} {
+      // Allow read if user is member of the group
+      allow read: if isAuthenticated()
+        && get(/databases/$(database)/documents/groups/$(resource.data.groupId)).data.members.hasAny([request.auth.uid]);
+      
+      // Allow create if authenticated and member of group
+      allow create: if isAuthenticated()
+        && request.resource.data.keys().hasAll(['text', 'uid', 'groupId', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 1000
+        && get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.members.hasAny([request.auth.uid]);
+      
+      // Allow update for read status and reactions
+      allow update: if isAuthenticated()
+        && request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'reactions']);
+      
+      // Allow delete only by sender
+      allow delete: if isAuthenticated()
+        && resource.data.uid == request.auth.uid;
+    }
+    
+    // Contacts collection rules - for contact-based privacy
+    match /contacts/{userId}/userContacts/{contactDocId} {
+      // Allow read only if user is viewing their own contacts
+      allow read: if isAuthenticated()
+        && request.auth.uid == userId;
+      
+      // Allow create if:
+      // 1. User is adding to their own contacts, OR
+      // 2. Someone is adding current user as their contact (mutual add)
+      allow create: if isAuthenticated()
+        && (
+          // Adding to own contacts
+          (request.auth.uid == userId
+            && request.resource.data.keys().hasAll(['contactId', 'addedAt'])
+            && request.resource.data.contactId is string
+            && request.resource.data.contactId != request.auth.uid) // Can't add self
+          ||
+          // Mutual add - someone adding me to their contacts
+          (request.resource.data.contactId == request.auth.uid
+            && request.resource.data.keys().hasAll(['contactId', 'addedAt'])
+            && request.resource.data.contactId is string)
+        );
+      
+      // Allow delete only by owner
+      allow delete: if isAuthenticated()
+        && request.auth.uid == userId;
+      
+      // No updates allowed
+      allow update: if false;
+    }
+  }
+}
