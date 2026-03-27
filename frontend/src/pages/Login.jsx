@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock, LogIn, ArrowLeft, Moon, Sun, Eye, EyeOff } from "lucide-react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
 import {
   signInWithEmailAndPassword,
@@ -36,12 +36,7 @@ export default function Login() {
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const { isDark, toggleTheme } = useTheme();
-  
-  // Check if user came from email verification
-  const searchParams = new URLSearchParams(location.search);
-  const isVerified = searchParams.get("verified") === "true";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -107,13 +102,12 @@ export default function Login() {
       // Get user data
       const user = userCredential.user;
 
-      // Save user to Firestore (email verification temporarily disabled)
+      // Save user to Firestore
       try {
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           displayName: user.displayName || "",
           email: user.email.toLowerCase(),
-          emailVerified: true,
           createdAt: serverTimestamp(),
         });
       } catch (firestoreError) {
@@ -296,17 +290,7 @@ export default function Login() {
           isDark ? 'text-gray-400' : 'text-gray-500'
         }`}>Sign in to continue</p>
 
-        {/* Show success message if email was verified */}
-        {isVerified && (
-          <div className={`mb-4 p-3 rounded-lg text-sm ${
-            isDark ? 'bg-green-900/30 text-green-400' : 'bg-green-50 text-green-600'
-          }`}>
-            ✅ Email verified successfully! Please sign in to continue.
-          </div>
-        )}
-
-        {/* Show error only if not coming from verification */}
-        {errors.general && !isVerified && (
+        {errors.general && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
             isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'
           }`}>

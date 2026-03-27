@@ -7,15 +7,19 @@ import { useTheme } from "./context/ThemeContext";
 import LandingPage from "./components/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
-import VerifyEmail from "./pages/VerifyEmail";
 import Profile from "./pages/Profile";
 import Chat from "./pages/Chat";
 
+<<<<<<< HEAD
 // Component to protect chat route - bypass email verification for development
+=======
+// Component to protect chat route - only checks authentication
+>>>>>>> 345957dfeeb150343505f969a8ba47a5ae5c9bf1
 function ProtectedChatRoute({ user }) {
   if (!user) {
     return <Navigate to="/login" />;
   }
+<<<<<<< HEAD
   // For development: skip email verification
   // if (!user.emailVerified) {
   //   return (
@@ -39,6 +43,8 @@ function ProtectedChatRoute({ user }) {
   //     </div>
   //   );
   // }
+=======
+>>>>>>> 345957dfeeb150343505f969a8ba47a5ae5c9bf1
   return <Chat user={user} />;
 }
 
@@ -72,7 +78,6 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/profile" element={<Profile />} />
         <Route
           path="/chat"

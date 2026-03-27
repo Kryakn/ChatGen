@@ -169,17 +169,6 @@ export default function Profile() {
               }`}>
                 {user.email}
               </p>
-              <span className={`inline-flex items-center gap-1 text-xs mt-1 ${
-                user.emailVerified 
-                  ? 'text-green-600' 
-                  : 'text-yellow-600'
-              }`}>
-                {user.emailVerified ? (
-                  <><Check size={12} /> Verified</>
-                ) : (
-                  "Not Verified"
-                )}
-              </span>
             </div>
           </div>
         </div>
